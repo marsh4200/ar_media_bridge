@@ -1,0 +1,32 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "AR Media Bridge",
+        "description": "Enter the IP address shown in the AR Media Bridge app on the box.",
+        "data": {
+          "host": "IP address",
+          "port": "Port"
+        }
+      },
+      "pair": {
+        "title": "Pair with {name}",
+        "description": "A 6-digit code is now showing on the TV (it's also on the AR Media Bridge app screen). Enter it below.",
+        "data": {
+          "code": "Pairing code"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Can't reach the box. Check it's on and the AR Media Bridge app has notification access.",
+      "invalid_code": "Wrong code. Check the TV and try again.",
+      "locked": "Too many wrong codes. Wait a minute - a new code will be shown."
+    },
+    "abort": {
+      "already_configured": "This box is already set up.",
+      "no_device_id": "The box didn't identify itself. Update the AR Media Bridge app.",
+      "reauth_successful": "Paired again."
+    }
+  }
+}

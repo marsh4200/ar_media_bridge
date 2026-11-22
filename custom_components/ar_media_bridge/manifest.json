@@ -1,0 +1,14 @@
+{
+  "domain": "ar_media_bridge",
+  "name": "AR Media Bridge",
+  "codeowners": ["@marsh4200"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/marsh4200/ar_media_bridge",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/marsh4200/ar_media_bridge/issues",
+  "requirements": [],
+  "version": "0.1.0",
+  "zeroconf": ["_armediabridge._tcp.local."]
+}

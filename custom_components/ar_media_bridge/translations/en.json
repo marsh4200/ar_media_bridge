@@ -28,5 +28,27 @@
       "no_device_id": "The box didn't identify itself. Update the AR Media Bridge app.",
       "reauth_successful": "Paired again."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "What happens when {name} plays or pauses",
+        "description": "Pick lights, scenes, scripts or switches for each state. Lights are set to the brightness under them (0% turns them off). Scenes, scripts and switches are turned on. Leave a box empty to do nothing for that state.",
+        "data": {
+          "playing_targets": "When playing",
+          "playing_brightness": "Light brightness when playing",
+          "paused_targets": "When paused",
+          "paused_brightness": "Light brightness when paused",
+          "idle_targets": "When stopped (back to home screen / app closed)",
+          "idle_brightness": "Light brightness when stopped",
+          "delay": "Wait before reacting",
+          "dark_only": "Only after sunset"
+        },
+        "data_description": {
+          "delay": "The state has to hold this long first, so skipping ahead or a quick buffer doesn't flicker the lights.",
+          "dark_only": "Uses the sun integration. Does nothing during the day."
+        }
+      }
+    }
   }
 }

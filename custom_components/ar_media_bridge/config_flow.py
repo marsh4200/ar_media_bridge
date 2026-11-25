@@ -8,8 +8,15 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
+from homeassistant.core import callback
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 try:  # HA 2025.1+
@@ -20,10 +27,22 @@ except ImportError:  # pragma: no cover - older HA
 from .client import BridgeClient, CannotConnect, InvalidCode, PairingLocked
 from .const import (
     CONF_CODE,
+    CONF_DARK_ONLY,
+    CONF_DELAY,
     CONF_DEVICE_ID,
+    CONF_IDLE_BRIGHTNESS,
+    CONF_IDLE_TARGETS,
     CONF_MANUFACTURER,
     CONF_MODEL,
+    CONF_PAUSED_BRIGHTNESS,
+    CONF_PAUSED_TARGETS,
+    CONF_PLAYING_BRIGHTNESS,
+    CONF_PLAYING_TARGETS,
     CONF_TOKEN,
+    DEFAULT_DELAY,
+    DEFAULT_IDLE_BRIGHTNESS,
+    DEFAULT_PAUSED_BRIGHTNESS,
+    DEFAULT_PLAYING_BRIGHTNESS,
     DEFAULT_PORT,
     DOMAIN,
 )
@@ -35,6 +54,12 @@ class ARMediaBridgeConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for AR Media Bridge."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """The Configure button: lights / scenes for play, pause and stop."""
+        return ARMediaBridgeOptionsFlow()
 
     def __init__(self) -> None:
         self._host: str | None = None
@@ -156,3 +181,50 @@ class ARMediaBridgeConfigFlow(ConfigFlow, domain=DOMAIN):
             "manufacturer": entry_data.get(CONF_MANUFACTURER),
         }
         return await self.async_step_pair()
+
+
+TARGETS = selector.EntitySelector(
+    selector.EntitySelectorConfig(
+        domain=["light", "scene", "script", "switch", "input_boolean"],
+        multiple=True,
+    )
+)
+BRIGHTNESS = selector.NumberSelector(
+    selector.NumberSelectorConfig(
+        min=0, max=100, step=5, unit_of_measurement="%", mode=selector.NumberSelectorMode.SLIDER
+    )
+)
+DELAY = selector.NumberSelector(
+    selector.NumberSelectorConfig(
+        min=0, max=30, step=1, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX
+    )
+)
+
+OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Optional(CONF_PLAYING_TARGETS): TARGETS,
+        vol.Optional(CONF_PLAYING_BRIGHTNESS, default=DEFAULT_PLAYING_BRIGHTNESS): BRIGHTNESS,
+        vol.Optional(CONF_PAUSED_TARGETS): TARGETS,
+        vol.Optional(CONF_PAUSED_BRIGHTNESS, default=DEFAULT_PAUSED_BRIGHTNESS): BRIGHTNESS,
+        vol.Optional(CONF_IDLE_TARGETS): TARGETS,
+        vol.Optional(CONF_IDLE_BRIGHTNESS, default=DEFAULT_IDLE_BRIGHTNESS): BRIGHTNESS,
+        vol.Optional(CONF_DELAY, default=DEFAULT_DELAY): DELAY,
+        vol.Optional(CONF_DARK_ONLY, default=False): selector.BooleanSelector(),
+    }
+)
+
+
+class ARMediaBridgeOptionsFlow(OptionsFlow):
+    """Pick what runs when the box plays, pauses or stops."""
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
+            ),
+            description_placeholders={"name": self.config_entry.title},
+        )

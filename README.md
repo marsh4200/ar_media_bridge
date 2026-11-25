@@ -72,6 +72,17 @@ Services: play, pause, play/pause, stop, next, previous, seek, volume up/down/se
 
 If you reset pairing on the box, HA asks you to re-enter the new code. You don't need to delete anything.
 
+### Lights / scenes on play and pause (built in)
+
+Go to **Settings → Devices & services → AR Media Bridge → Configure**. For **When playing**, **When paused** and **When stopped** you can pick any lights, scenes, scripts or switches:
+
+- Lights go to the brightness slider under them (0% turns them off).
+- Scenes, scripts and switches are turned on.
+- **Wait before reacting** (default 2 s) stops seeking or short buffering from flickering the lights.
+- **Only after sunset** skips it all during the day.
+
+Saving applies the change straight away. You don't need a YAML automation, but the example below still works if you want more control.
+
 ### Automation example
 
 ```yaml

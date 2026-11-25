@@ -9,6 +9,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .client import BridgeClient
 from .const import CONF_TOKEN
+from .reactions import PlaybackReactions
 
 PLATFORMS = [Platform.MEDIA_PLAYER]
 
@@ -33,10 +34,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: BridgeConfigEntry) -> bo
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    reactions = PlaybackReactions(hass, client, dict(entry.options))
+    reactions.start()
+    entry.async_on_unload(reactions.stop)
+    entry.async_on_unload(entry.add_update_listener(_options_updated))
+
     entry.async_create_background_task(
         hass, client.run(), f"ar_media_bridge_{entry.entry_id}"
     )
     return True
+
+
+async def _options_updated(hass: HomeAssistant, entry: BridgeConfigEntry) -> None:
+    """Configure screen saved: reload so the new lights/scenes take effect."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: BridgeConfigEntry) -> bool:
